@@ -6,7 +6,6 @@ export async function GET(
 ) {
   try {
     const { roomCode } = await params;
-    console.log({ roomCode });
     const { room } = await roomService.findRoomByRoomCode(roomCode);
 
     return Response.json({

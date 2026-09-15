@@ -7,24 +7,27 @@ import TextInput from './../components/Input';
 export default function Home() {
   const [roomCode,setRoomCode]  = useState('')
   const [name,setName]  = useState('')
-  const joinRoom = async () => {
-    if(!socket.connected)
-    {
-      socket.connect()
-    }
-    if(!roomCode)
-    {
-      socket.emit(SOCKET_EVENTS.ROOM.CREATE,{
+  const joinRoom = () => {
+  const join = () => {
+    if (!roomCode) {
+      socket.emit(SOCKET_EVENTS.ROOM.CREATE, {
         name,
-      })
-    }
-    else {
-      socket.emit(SOCKET_EVENTS.ROOM.JOIN,{
+      });
+    } else {
+      socket.emit(SOCKET_EVENTS.ROOM.JOIN, {
         name,
-        roomCode
-      })
+        roomCode,
+      });
     }
+  };
+
+  if (socket.connected) {
+    join();
+  } else {
+    socket.once("connect", join);
+    socket.connect();
   }
+};
   const router = useRouter()
   useEffect(()=>{
     const handleRoomJoin  = ({roomCode } : {roomCode : string}) => {
@@ -54,9 +57,9 @@ handleRoomJoin({roomCode})
       <TextInput name={'code'} label={"Room Code"} value={roomCode} capitalize maxLength={6} onChange={(e : React.ChangeEvent<HTMLInputElement>) => {
         setRoomCode(e.target.value)
       }}/>
-      <button disabled={!name || (roomCode.length < 6 && !!roomCode)} className='bg-purple-700 rounded-lg py-2 px-4 cursor-pointer disabled:bg-purple-950 disabled:cursor-not-allowed'
+      <button disabled={!name || (roomCode.length < 6 && !!roomCode)} className='mt-2 bg-purple-700 rounded-lg py-2 px-4 cursor-pointer disabled:bg-purple-950 disabled:cursor-not-allowed'
       onClick={joinRoom}>
-        {roomCode ? "Join" : "Create"}
+        {roomCode ? "Join Room" : "Create Room"}
       </button>
     </div>
   );

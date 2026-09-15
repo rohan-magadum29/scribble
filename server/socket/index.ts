@@ -1,12 +1,14 @@
+import { error } from "console";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { SOCKET_EVENTS } from "./../../src/shared/socket-events";
 import { roomService } from "../services/roomService";
+import { strokeService } from "../services/strokeService";
+import { SOCKET_EVENTS } from "./../../src/shared/socket-events";
 
 const httpServer = createServer();
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: process.env.CLIENT_URL,
   },
 });
 io.on("connection", (socket) => {
@@ -50,24 +52,35 @@ io.on("connection", (socket) => {
   );
   socket.on(SOCKET_EVENTS.DRAW.DRAW, async (data) => {
     try {
-      const sockets = await io.in(data.roomId).fetchSockets();
       console.log("Broadcasting to room:", data.roomId);
-    console.log(
-      "Clients:",
-      sockets.map((s) => s.id),
-    );
       socket.to(data.roomId).emit(SOCKET_EVENTS.DRAW.DRAW, data);
     } catch (error) {
       console.log({ error });
     }
   });
+  socket.on(
+    SOCKET_EVENTS.DRAW.STROKE_COMPLETE,
+    async ({ roomId, points, color, width }) => {
+      console.log('Event Received',roomId,points)
+      try {
+        await strokeService.createStroke({
+          color,
+          points,
+          roomId,
+          width,
+        });
+        console.log("Stroke saved:", roomId);
+      } catch {
+        console.log({ error });
+      }
+    },
+  );
   console.log("Connected:", socket.id);
 
   socket.on("disconnect", (reason) => {
     console.log("Disconnected:", socket.id, reason);
   });
 });
-
-httpServer.listen(3001, async () => {
-  console.log("Server Started on port 3001");
+httpServer.listen(process.env.SOCKET_PORT, Number("0.0.0.0"), async () => {
+  console.log(`Server Started on port ${process.env.SOCKET_PORT}`);
 });

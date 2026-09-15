@@ -8,5 +8,6 @@ export const SOCKET_EVENTS =  {
     },
     DRAW : {
         DRAW : 'draw',
+        STROKE_COMPLETE : 'stroke-completed'
     }
 }
