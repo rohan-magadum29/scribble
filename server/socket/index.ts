@@ -81,6 +81,6 @@ io.on("connection", (socket) => {
     console.log("Disconnected:", socket.id, reason);
   });
 });
-httpServer.listen(process.env.SOCKET_PORT, Number("0.0.0.0"), async () => {
-  console.log(`Server Started on port ${process.env.SOCKET_PORT}`);
+httpServer.listen(process.env.PORT, Number("0.0.0.0"), async () => {
+  console.log(`Server Started on port ${process.env.PORT}`);
 });
