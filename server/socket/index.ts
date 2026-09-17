@@ -85,3 +85,6 @@ const PORT = Number(process.env.PORT) || 3001;
 httpServer.listen(PORT,"0.0.0.0",  () => {
   console.log(`Server Started on port ${process.env.PORT}`);
 });
+httpServer.on("error", (err) => {
+  console.error("HTTP SERVER ERROR:", err);
+});
