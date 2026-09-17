@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "socket" : "npx tsx watch ./server/socket/index.ts"
+    "socket" : "npx tsx ./server/socket/index.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
