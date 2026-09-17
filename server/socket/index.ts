@@ -5,7 +5,10 @@ import { roomService } from "../services/roomService";
 import { strokeService } from "../services/strokeService";
 import { SOCKET_EVENTS } from "./../../src/shared/socket-events";
 
-const httpServer = createServer();
+const httpServer = createServer((req, res) => {
+  res.writeHead(200);
+  res.end("Socket server is running");
+});
 const io = new Server(httpServer, {
   cors: {
     origin: process.env.CLIENT_URL,
@@ -83,7 +86,7 @@ io.on("connection", (socket) => {
 });
 const PORT = Number(process.env.PORT) || 3001;
 httpServer.listen(PORT,"0.0.0.0",  () => {
-  console.log(`Server Started on port ${process.env.PORT}`);
+  console.log(`Server Started on port ${PORT}`);
 });
 httpServer.on("error", (err) => {
   console.error("HTTP SERVER ERROR:", err);
