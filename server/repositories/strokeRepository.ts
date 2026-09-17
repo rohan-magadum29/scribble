@@ -1,6 +1,6 @@
-import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { Point } from "@/types/drawing";
+import { Prisma } from "@prisma/client";
 
 class StrokeRepository {
   async createStroke({
