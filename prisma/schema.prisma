@@ -23,19 +23,19 @@ model Room {
   id   String @id @default(cuid())
   code String @unique
 
-  ownerId String
-  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id])
   createdAt DateTime @default(now())
 
   strokes Stroke[]
 }
 
 model Stroke {
-  id        String   @id @default(cuid())
-  roomId    String
-  points    Json
-  color     String
-  width     Float
+  id     String @id @default(cuid())
+  roomId String
+  points Json
+  color  String
+  width  Float
 
   createdAt DateTime @default(now())
 
@@ -43,4 +43,3 @@ model Stroke {
 
   @@index([roomId, createdAt])
 }
-
