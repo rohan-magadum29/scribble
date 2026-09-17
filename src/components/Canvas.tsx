@@ -31,7 +31,7 @@ useEffect(() => {
   return (
     <canvas
       ref={canvasRef}
-      className={`bg-gray-200 rounded-lg cursor-crosshair  ${className}`}
+      className={`bg-gray-200 rounded-lg cursor-crosshair touch-none  ${className}`}
     />
   );
 }

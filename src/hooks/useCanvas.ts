@@ -117,18 +117,18 @@ export const useCanvas = ({ canvasRef }: UseCanvasProps) => {
       }
     };
 
-    canvas.addEventListener("mousedown", startDrawing);
-    canvas.addEventListener("mousemove", draw);
-    canvas.addEventListener("mouseup", stopDrawing);
-    canvas.addEventListener("mouseleave", stopDrawing);
+    canvas.addEventListener("pointerdown", startDrawing);
+    canvas.addEventListener("pointermove", draw);
+    canvas.addEventListener("pointerup", stopDrawing);
+    canvas.addEventListener("pointerleave", stopDrawing);
     socket.on(SOCKET_EVENTS.DRAW.DRAW, ({ points, color, width }) => {
       drawStroke(points, color, width, ctx, canvas);
     });
     return () => {
-      canvas.removeEventListener("mousedown", startDrawing);
-      canvas.removeEventListener("mousemove", draw);
-      canvas.removeEventListener("mouseup", stopDrawing);
-      canvas.removeEventListener("mouseleave", stopDrawing);
+      canvas.removeEventListener("pointerdown", startDrawing);
+      canvas.removeEventListener("pointermove", draw);
+      canvas.removeEventListener("pointerup", stopDrawing);
+      canvas.removeEventListener("pointerleave", stopDrawing);
       socket.off(SOCKET_EVENTS.DRAW.DRAW);
     };
   }, [canvasRef, room?.id, roomCode]);
@@ -153,7 +153,7 @@ export const useCanvas = ({ canvasRef }: UseCanvasProps) => {
       else {
         socketPendingPoints.current = []
       }
-    }, 33);
+    }, 100);
 
     return () => clearInterval(id);
   }, [room?.id, roomCode]);
@@ -167,24 +167,25 @@ export const useCanvas = ({ canvasRef }: UseCanvasProps) => {
 
     loadRoom();
   }, [roomCode]);
-  useEffect(() => {
-    if (!roomCode) return;
+ useEffect(() => {
+    const name = sessionStorage.getItem('name')
+    if (!roomCode || !name) return;
 
-    const handleConnect = () => {
-      socket.emit(SOCKET_EVENTS.ROOM.JOIN, {
-        name,
-        roomCode,
-      });
-    };
+  const handleConnect = () => {
+    socket.emit(SOCKET_EVENTS.ROOM.JOIN, {
+      name,
+      roomCode,
+    });
+  };
 
     socket.on("connect", handleConnect);
     if (!socket.connected) {
-      socket.connect();
-    }
-    return () => {
-      socket.off("connect", handleConnect);
-    };
-  }, [roomCode, name]);
+    socket.connect();
+  }
+  return () => {
+    socket.off("connect", handleConnect);
+  };
+  }, [roomCode, ]);
   return {
     loadStrokes
   };

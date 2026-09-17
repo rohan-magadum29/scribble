@@ -19,6 +19,7 @@ export default function Home() {
         roomCode,
       });
     }
+    sessionStorage.setItem('name',name)
   };
 
   if (socket.connected) {
