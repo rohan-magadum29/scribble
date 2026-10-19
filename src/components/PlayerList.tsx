@@ -14,6 +14,7 @@ const PlayerList = () => {
 
     return () => {
       socket.off(SOCKET_EVENTS.ROOM.JOINED, getPlayerCount);
+
       socket.off(SOCKET_EVENTS.ROOM.LEFT, getPlayerCount);
     };
   }, []);
