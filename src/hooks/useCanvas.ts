@@ -11,6 +11,7 @@ import { DrawingConfig, Point, UseCanvasProps } from "@/types/drawing";
 import { Room } from "@prisma/client";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useUser } from "./useUser";
 
 export const useCanvas = ({ canvasRef }: UseCanvasProps) => {
   const { roomCode } = useParams<{ roomCode: string }>();
@@ -23,7 +24,8 @@ export const useCanvas = ({ canvasRef }: UseCanvasProps) => {
     width: 5,
     color: "black",
   });
-   async function loadStrokes() {
+  const { getUserName } = useUser();
+  async function loadStrokes() {
     try {
       const res = await fetch(`/api/rooms/${roomCode}/strokes`);
 
@@ -80,12 +82,8 @@ export const useCanvas = ({ canvasRef }: UseCanvasProps) => {
         drawingConfig.current.width,
         ctx,
       );
-      socketPendingPoints.current.push(
-        normalizePoint(currentPoint, canvas),
-      );
-      dbPendingPoints.current.push(
-        normalizePoint(currentPoint, canvas),
-      );
+      socketPendingPoints.current.push(normalizePoint(currentPoint, canvas));
+      dbPendingPoints.current.push(normalizePoint(currentPoint, canvas));
       lastPoint.current = currentPoint;
     };
 
@@ -144,14 +142,11 @@ export const useCanvas = ({ canvasRef }: UseCanvasProps) => {
         color: drawingConfig.current.color,
         width: drawingConfig.current.width,
       });
-      const lastPoint = socketPendingPoints.current.at(-1)
-      if(lastPoint)
-      {
-
+      const lastPoint = socketPendingPoints.current.at(-1);
+      if (lastPoint) {
         socketPendingPoints.current = [lastPoint];
-      }
-      else {
-        socketPendingPoints.current = []
+      } else {
+        socketPendingPoints.current = [];
       }
     }, 100);
 
@@ -167,26 +162,26 @@ export const useCanvas = ({ canvasRef }: UseCanvasProps) => {
 
     loadRoom();
   }, [roomCode]);
- useEffect(() => {
-    const name = sessionStorage.getItem('name')
+  useEffect(() => {
+    const name = getUserName();
     if (!roomCode || !name) return;
 
-  const handleConnect = () => {
-    socket.emit(SOCKET_EVENTS.ROOM.JOIN, {
-      name,
-      roomCode,
-    });
-  };
+    const handleConnect = () => {
+      socket.emit(SOCKET_EVENTS.ROOM.JOIN, {
+        name,
+        roomCode,
+      });
+    };
 
     socket.on("connect", handleConnect);
     if (!socket.connected) {
-    socket.connect();
-  }
-  return () => {
-    socket.off("connect", handleConnect);
-  };
-  }, [roomCode, ]);
+      socket.connect();
+    }
+    return () => {
+      socket.off("connect", handleConnect);
+    };
+  }, [roomCode]);
   return {
-    loadStrokes
+    loadStrokes,
   };
 };

@@ -4,7 +4,8 @@ export const SOCKET_EVENTS =  {
         JOIN : "room:join",
         CREATED : 'room:created',
         JOINED : 'room:joined',
-        ERROR : 'room:error'
+        ERROR : 'room:error',
+        LEFT : "room:left"
     },
     DRAW : {
         DRAW : 'draw',

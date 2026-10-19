@@ -20,10 +20,13 @@ io.on("connection", (socket) => {
       const { room, user } = await roomService.createRoom(name);
 
       socket.join(room.id);
+
       socket.emit(SOCKET_EVENTS.ROOM.CREATED, {
         roomId: room.id,
         roomCode: room.code,
         userId: user.id,
+        message: "Room Created Successfully",
+        status: "success",
       });
       console.log(`Room (${room.id}/${room.code}) Joined by ${socket.id}`);
     } catch (error) {
@@ -38,15 +41,34 @@ io.on("connection", (socket) => {
     async ({ name, roomCode }: { name: string; roomCode: string }) => {
       try {
         const { room, user } = await roomService.joinRoom(name, roomCode);
-        socket.join(room.id);
+
+        await socket.join(room.id);
+
+        const userCount = io.sockets.adapter.rooms.get(room.id)?.size ?? 0;
+        // Send to everyone who was ALREADY in the room
+        socket.to(room.id).emit(SOCKET_EVENTS.ROOM.JOINED, {
+          roomId: room.id,
+          roomCode: room.code,
+          userId: user.id,
+          userCount,
+          message: `${user.name} Joined Room`,
+          status: "success",
+        });
+
+        // Send confirmation specifically to the new player
         socket.emit(SOCKET_EVENTS.ROOM.JOINED, {
           roomId: room.id,
           roomCode: room.code,
           userId: user.id,
+          userCount,
+          message: `${user.name} Joined Room`,
+          status: "success",
         });
+
         console.log(`Room (${room.id}/${room.code}) Joined by ${socket.id}`);
       } catch (error) {
         console.log({ error });
+
         socket.emit(SOCKET_EVENTS.ROOM.ERROR, {
           message: "Failed to Join room",
         });
@@ -64,7 +86,7 @@ io.on("connection", (socket) => {
   socket.on(
     SOCKET_EVENTS.DRAW.STROKE_COMPLETE,
     async ({ roomId, points, color, width }) => {
-      console.log('Event Received',roomId,points)
+      console.log("Event Received", roomId, points);
       try {
         await strokeService.createStroke({
           color,
@@ -81,11 +103,22 @@ io.on("connection", (socket) => {
   console.log("Connected:", socket.id);
 
   socket.on("disconnect", (reason) => {
-    console.log("Disconnected:", socket.id, reason);
+    const roomId = socket.data.roomId;
+
+    console.log("Disconnected:", socket.id, roomId, reason);
+
+    if (!roomId) return;
+
+    const userCount = io.sockets.adapter.rooms.get(roomId)?.size ?? 0;
+
+    io.to(roomId).emit(SOCKET_EVENTS.ROOM.LEFT, {
+      roomId,
+      userCount,
+    });
   });
 });
 const PORT = Number(process.env.PORT) || 3001;
-httpServer.listen(PORT,"0.0.0.0",  () => {
+httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`Server Started on port ${PORT}`);
 });
 httpServer.on("error", (err) => {
