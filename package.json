@@ -1,36 +1,12 @@
 {
   "name": "scribble-clone",
-  "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "socket": "npx tsx watch ./server/socket/index.ts"
-  },
-  "dependencies": {
-    "@hugeicons/core-free-icons": "^4.3.4",
-    "@hugeicons/react": "^1.1.10",
-    "@prisma/client": "^6.19.3",
-    "nanoid": "^6.0.0",
-    "next": "16.2.10",
-    "prisma": "^6.19.3",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "socket.io": "^4.8.3",
-    "socket.io-client": "^4.8.3",
-    "sonner": "^2.0.8"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "babel-plugin-react-compiler": "1.0.0",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.10",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "build:shared": "pnpm --filter @scribble/shared build",
+    "build:backend": "pnpm --filter backend build",
+    "build:frontend": "pnpm --filter frontend build",
+    "build": "pnpm build:shared && pnpm build:backend && pnpm build:frontend"
   }
 }
