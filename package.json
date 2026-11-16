@@ -1,6 +1,7 @@
 {
   "name": "scribble-clone",
   "private": true,
+  "packageManager": "pnpm@12.21.0",
   "scripts": {
     "dev:frontend": "pnpm --filter frontend dev",
     "dev:backend": "pnpm --filter backend dev",
