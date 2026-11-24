@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import TextInput from "../components/Input";
 import { useUser } from "../hooks/useUser";
 import { SOCKET_EVENTS } from "@scribble/shared";
+import Toast from "@/components/Toast";
 
 export default function Home() {
   const [roomCode, setRoomCode] = useState("");
@@ -48,15 +49,21 @@ export default function Home() {
     const handleConnectError = () => {
       setIsLoading(false);
     };
+    const handleRoomError = (e : {message : string,status : 'error'}) => {
+      Toast(e.message,e.status)
+      setIsLoading(false);
+    }
 
     socket.on(SOCKET_EVENTS.ROOM.CREATED, handleRoomEntered);
     socket.on(SOCKET_EVENTS.ROOM.JOINED, handleRoomEntered);
     socket.on("connect_error", handleConnectError);
+    socket.on(SOCKET_EVENTS.ROOM.ERROR,handleRoomError)
 
     return () => {
       socket.off(SOCKET_EVENTS.ROOM.CREATED, handleRoomEntered);
       socket.off(SOCKET_EVENTS.ROOM.JOINED, handleRoomEntered);
       socket.off("connect_error", handleConnectError);
+      socket.off(SOCKET_EVENTS.ROOM.ERROR,handleRoomError)
     };
   }, [router, setUserId]);
 

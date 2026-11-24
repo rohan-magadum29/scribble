@@ -6,12 +6,13 @@ import {
   normalizePoint,
 } from "../lib/canvas";
 import { socket } from "../lib/socket";
-import { SOCKET_EVENTS } from "@scribble/shared";
+import { SOCKET_EVENTS, Stroke } from "@scribble/shared";
 import type { DrawingConfig, Point } from "@scribble/shared";
 import { useParams } from "next/navigation";
 import { RefObject, useEffect, useRef, useState } from "react";
 import { useUser } from "./useUser";
 import type { Room } from "@scribble/shared";
+import { httpClient } from "@/lib/httpClient";
 interface UseCanvasProps {
   canvasRef: RefObject<HTMLCanvasElement | null>;
 }
@@ -21,7 +22,7 @@ export const useCanvas = ({ canvasRef }: UseCanvasProps) => {
   const isDrawing = useRef(false);
   const lastPoint = useRef<Point>({ x: 0, y: 0 });
   const socketPendingPoints = useRef<Point[]>([]);
-  const dbPendingPoints = useRef<Point[]>([]);
+  // const dbPendingPoints = useRef<Point[]>([]);
   const drawingConfig = useRef<DrawingConfig>({
     width: 5,
     color: "black",
@@ -29,16 +30,11 @@ export const useCanvas = ({ canvasRef }: UseCanvasProps) => {
   const { getUserName } = useUser();
   async function loadStrokes() {
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SOCKET_URL}/api/rooms/${roomCode}/strokes`,
+      const res = await httpClient < {data : Stroke []}>(
+        `/api/rooms/${roomCode}/strokes`,
       );
 
-      if (!res.ok) {
-        throw new Error("Failed to load strokes");
-      }
-
-      const jsonData = await res.json();
-      const strokes = jsonData.data;
+      const strokes = res.data;
 
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -87,7 +83,7 @@ export const useCanvas = ({ canvasRef }: UseCanvasProps) => {
         ctx,
       );
       socketPendingPoints.current.push(normalizePoint(currentPoint, canvas));
-      dbPendingPoints.current.push(normalizePoint(currentPoint, canvas));
+      // dbPendingPoints.current.push(normalizePoint(currentPoint, canvas));
       lastPoint.current = currentPoint;
     };
 
@@ -107,16 +103,16 @@ export const useCanvas = ({ canvasRef }: UseCanvasProps) => {
         socketPendingPoints.current = [];
       }
 
-      if (dbPendingPoints.current.length) {
-        socket.emit(SOCKET_EVENTS.DRAW.STROKE_COMPLETE, {
-          roomId: room.id,
-          roomCode,
-          points: dbPendingPoints.current,
-          color: drawingConfig.current.color,
-          width: drawingConfig.current.width,
-        });
-        dbPendingPoints.current = [];
-      }
+      // if (dbPendingPoints.current.length) {
+      //   socket.emit(SOCKET_EVENTS.DRAW.STROKE_COMPLETE, {
+      //     roomId: room.id,
+      //     roomCode,
+      //     points: dbPendingPoints.current,
+      //     color: drawingConfig.current.color,
+      //     width: drawingConfig.current.width,
+      //   });
+      //   dbPendingPoints.current = [];
+      // }
     };
 
     canvas.addEventListener("pointerdown", startDrawing);
@@ -159,11 +155,10 @@ export const useCanvas = ({ canvasRef }: UseCanvasProps) => {
 
   useEffect(() => {
     async function loadRoom() {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SOCKET_URL}/api/rooms/${roomCode}`,
+      const res = await httpClient <{data : Room}>(
+        `/api/rooms/${roomCode}`,
       );
-      const jsonData = await res.json();
-      setRoom(jsonData?.data);
+      setRoom(res?.data);
     }
 
     loadRoom();

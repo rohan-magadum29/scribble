@@ -9,3 +9,20 @@ export interface Room {
   createdAt: Date;
   strokes: Stroke[];
 }
+
+
+export interface Player {
+  userId: string;
+  username: string;
+  socketId: string;
+  isHost: boolean;
+  score: number;
+  isConnected: boolean;
+}
+
+export interface RoomState {
+  roomCode: string;
+  hostId: string;
+  status: "WAITING" | "PLAYING" | "FINISHED";
+  players: Map<string, Player>;
+}

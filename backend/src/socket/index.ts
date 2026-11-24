@@ -51,16 +51,15 @@ export const initializeSocket = (io: Server) => {
             roomCode: room.code,
             userId: user.id,
             userCount,
-            message: `${user.name} Joined Room`,
+            message: `You Joined Room`,
             status: "success",
           });
 
           console.log(`Room (${room.id}/${room.code}) Joined by ${socket.id}`);
         } catch (error) {
-          console.log({ error });
-
           socket.emit(SOCKET_EVENTS.ROOM.ERROR, {
-            message: "Failed to Join room",
+            message: error instanceof Error ?  error.message : "Error",
+            status : "error"
           });
         }
       },
@@ -73,23 +72,23 @@ export const initializeSocket = (io: Server) => {
         console.log({ error });
       }
     });
-    socket.on(
-      SOCKET_EVENTS.DRAW.STROKE_COMPLETE,
-      async ({ roomId, points, color, width }) => {
-        console.log("Event Received", roomId, points);
-        try {
-          await strokeService.createStroke({
-            color,
-            points,
-            roomId,
-            width,
-          });
-          console.log("Stroke saved:", roomId);
-        } catch (error) {
-          console.log({ error });
-        }
-      },
-    );
+    // socket.on(
+    //   SOCKET_EVENTS.DRAW.STROKE_COMPLETE,
+    //   async ({ roomId, points, color, width }) => {
+    //     console.log("Event Received", roomId, points);
+    //     try {
+    //       await strokeService.createStroke({
+    //         color,
+    //         points,
+    //         roomId,
+    //         width,
+    //       });
+    //       console.log("Stroke saved:", roomId);
+    //     } catch (error) {
+    //       console.log({ error });
+    //     }
+    //   },
+    // );
     console.log("Connected:", socket.id);
 
     socket.on("disconnect", (reason) => {
